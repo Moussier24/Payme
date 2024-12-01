@@ -47,7 +47,7 @@ class TransactionController extends Controller
                     ],
                     'actions' => [
                         'cancel_url' => 'http://localhost:8000/success',
-                        'return_url' => 'http://localhost:8000/success',
+                        'return_url' => 'http://localhost:8000/cancel',
                         'callback_url' => 'https://c511-41-138-98-104.ngrok-free.app/api/callback'
                     ],
                     'custom_data' => [
