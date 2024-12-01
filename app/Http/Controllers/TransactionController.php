@@ -94,7 +94,9 @@ class TransactionController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data' => $transaction
+                'data' => $transaction,
+                'success_url' => 'http://localhost:8000/success',
+                'failure_url' => 'http://localhost:8000/cancel',
             ], 201);
 
         } catch (\Exception $e) {
