@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -47,11 +48,10 @@ class TransactionController extends Controller
                     'actions' => [
                         'cancel_url' => 'http://localhost:8000/success',
                         'return_url' => 'http://localhost:8000/success',
-                        'callback_url' => 'http://localhost:8000/success'
+                        'callback_url' => 'https://c511-41-138-98-104.ngrok-free.app/api/callback'
                     ],
                     'custom_data' => [
                         'transaction_id' => 'ORD-' . time(),
-                        'Plateforme' => 'Payme'
                     ]
                 ]
             ];
@@ -90,7 +90,6 @@ class TransactionController extends Controller
                 'amount' => $validated['amount'],
                 'payment_link' => $responseData->response_text ?? null,
                 'status' => Transaction::STATUS_PENDING,
-                'details' => $response
             ]);
 
             return response()->json([
@@ -104,5 +103,41 @@ class TransactionController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function payment_callback(Request $request)
+    {
+        $payload = $request->getContent();
+        $event = json_decode($payload);
+
+        $token = $event->token;
+        $status = $event->status;
+
+        Log::info('callback', ['event' => $event]);
+
+        $transaction = Transaction::where('token', $token)->first(); // Ou avec le transaction_id ou tout autre identifiant unique
+
+        Log::info('transaction', ['transaction' => $transaction]);
+
+        if ($transaction->status === Transaction::STATUS_PENDING && $status === "completed") {
+            // Mettre à jour le statut de la transaction dans la base de données
+            $transaction->status = Transaction::STATUS_SUCCESS;
+            $transaction->details = $event;
+            $transaction->save();
+            // Livrer le produit ou valider la commande
+            //process_order($transaction);
+            // Envoyer un email de confirmation
+            // ...
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction validée avec succès'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur lors de la validation de la transaction'
+        ], 500);
     }
 }
