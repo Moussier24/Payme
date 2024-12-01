@@ -142,4 +142,27 @@ class TransactionController extends Controller
             'message' => 'Erreur lors de la validation de la transaction'
         ], 500);
     }
+
+    /**
+     * Récupère la liste des transactions
+     *
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
+    {
+        try {
+            $transactions = Transaction::latest()->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $transactions
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Erreur lors de la récupération des transactions: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -5,3 +5,4 @@ use App\Http\Controllers\TransactionController;
 
 Route::post('/transactions', [TransactionController::class, 'store']);
 Route::post('/callback', [TransactionController::class, 'payment_callback']);
+Route::get('/transactions', [TransactionController::class, 'index']);
